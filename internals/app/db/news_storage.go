@@ -9,6 +9,7 @@ import (
 
 type NewsStorage struct {
 	database *sql.DB
+	smth     string
 }
 
 func NewNewsStorage(db *sql.DB) *NewsStorage {
