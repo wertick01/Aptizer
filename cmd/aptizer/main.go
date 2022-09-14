@@ -22,7 +22,7 @@ func main() {
 		usersStorage,
 	)
 	news, err := store.NewsStorage.List()
-	fmt.Println(news, err)
+	fmt.Println(news)
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {
