@@ -17,7 +17,7 @@ func main() {
 	newsStorage := db.NewNewsStorage(database)
 	store := db.New(database, newsStorage)
 	news, err := store.NewsStorage.List()
-	fmt.Println(news, err)
+	fmt.Println(news)
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {

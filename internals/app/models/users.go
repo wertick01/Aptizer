@@ -8,6 +8,7 @@ type User struct {
 	Patrynomic string `json:"patrynomic"`
 	Mail       string `json:"mail"`
 	Hash       string `json:"hash"`
+	Photo      string `json:"userphoto"`
 	Role       Role   `json:"Role"`
 }
 

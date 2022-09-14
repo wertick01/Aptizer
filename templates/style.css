@@ -1,0 +1,41 @@
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-attachment: fixed, fixed;
+
+    font-size: 15px;
+    line-height: 1.6;
+    color: black;
+}
+
+.container {
+  width: 80%;
+  max-width: 720px;
+}
+
+.intro {
+    background: url("images/back.jpg") no-repeat center center fixed;
+    -webkit-background-size: auto;
+    background-attachment: fixed, fixed;
+    background-size: auto;
+}
+
+.formuler {
+    text-align: center;
+}
+
+.scale {
+    display: inline-block; /* Строчно-блочный элемент */
+    overflow: hidden; /* Скрываем всё за контуром */
+}
+.scale img {
+transition: 1s; /* Время эффекта */
+display: block; /* Убираем небольшой отступ снизу */
+}
+.scale img:hover {
+transform: scale(1.2); /* Увеличиваем масштаб */
+}
+
+svg{
+    width:70%;
+}
