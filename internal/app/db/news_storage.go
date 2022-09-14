@@ -3,19 +3,14 @@ package db
 import (
 	"database/sql"
 
-	"aptizer.com/internals/app/models"
+	"aptizer.com/internal/app/models"
+	"github.com/doug-martin/goqu/v9"
 	"github.com/huandu/go-sqlbuilder"
 )
 
 type NewsStorage struct {
 	database *sql.DB
 	smth     string
-}
-
-func NewNewsStorage(db *sql.DB) *NewsStorage {
-	storage := new(NewsStorage)
-	storage.database = db
-	return storage
 }
 
 func (news *NewsStorage) List() ([]*models.News, error) {
@@ -96,6 +91,28 @@ func (news *NewsStorage) List() ([]*models.News, error) {
 		headline_id = value.ID
 	}
 	return listNews, nil
+}
+
+func (news *NewsStorage) Create(headline *models.News) (*models.News, error) {
+	dialect := goqu.Dialect("mysql")
+
+	query, _, err := dialect.Insert(
+		"users",
+	).Prepared(
+		true,
+	).Rows(
+		goqu.Record{
+			"headline_date": headline.Date,
+			"title":         headline.Title,
+			"headline_text": headline.Text,
+			"photo":         headline.Photo,
+			"author_id":     headline.Author,
+			"participants":  headline.Participants,
+		},
+	).ToSQL()
+	if err != nil {
+		return nil, err
+	}
 }
 
 func Reverse(input []*models.Tag) []*models.Tag {

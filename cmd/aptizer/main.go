@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"aptizer.com/internals/app/db"
+	"aptizer.com/internal/app/db"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -15,7 +15,12 @@ func main() {
 		log.Fatal(err)
 	}
 	newsStorage := db.NewNewsStorage(database)
-	store := db.New(database, newsStorage)
+	usersStorage := db.NewUsersStorage(database)
+	store := db.New(
+		database,
+		newsStorage,
+		usersStorage,
+	)
 	news, err := store.NewsStorage.List()
 	fmt.Println(news, err)
 }
