@@ -20,12 +20,13 @@ CREATE TABLE users (
 
 CREATE TABLE news (
     id INTEGER NOT NULL AUTO_INCREMENT, 
-    headline_date TIMESTAMP NOT NULL,
+    headline_date INTEGER NOT NULL,
     title VARCHAR(200) NOT NULL, 
     headline_text VARCHAR(100), 
     photo VARCHAR(150) NOT NULL, 
     author_id INTEGER NOT NULL,
-    participants INTEGER,
+    updated_at TIMESTAMP DEFAULT NULL,
+    actual BOOLEAN DEFAULT true,
     PRIMARY KEY(id),
     FOREIGN KEY(author_id) REFERENCES users(userid)
 );
@@ -57,11 +58,11 @@ INSERT INTO users (userphone, username, usersurname, userpatrynomic, useremail, 
     ('89512590156', 'Pavel', 'Desyukevich', 'Yurievich', 'cool.pumba01@yandex.ru', 'qwerty', 'Very stupid moran', 'morans/moran.jpg', 1),
     ('89614780777', 'Vyacheslav', 'Bogatov', 'Alexandrovich', 'adolph@yandex.ru', 'qwerty', 'Very stupid nazi', 'nazis/nazi.jpg', 2);
 
-INSERT INTO news (headline_date, title, headline_text, photo, author_id, participants) VALUES 
-    (NOW(), 'First title', 'Author has fucked your mummy', 'their/photo.jpg', 1, 1), 
-    (NOW(), 'Second title', 'Author has fucked your mummy again', 'their/new/photo.jpg', 1, 2),
-    (NOW(), 'Third title', 'Author has fucked your mummy thirdly', 'their/third/photo.jpg', 2, 2),
-    (NOW(), 'Fourth title', 'Author has fucked your mummy fourthly', 'their/fourth/photo.jpg', 1, 3);
+INSERT INTO news (headline_date, title, headline_text, photo, author_id) VALUES 
+    (UNIX_TIMESTAMP(NOW()), 'First title', 'Author has fucked your mummy', 'their/photo.jpg', 1), 
+    (UNIX_TIMESTAMP(NOW()), 'Second title', 'Author has fucked your mummy again', 'their/new/photo.jpg', 1),
+    (UNIX_TIMESTAMP(NOW()), 'Third title', 'Author has fucked your mummy thirdly', 'their/third/photo.jpg', 2),
+    (UNIX_TIMESTAMP(NOW()), 'Fourth title', 'Author has fucked your mummy fourthly', 'their/fourth/photo.jpg', 1);
 
 INSERT INTO tags (tag) VALUES
     ('fuck you'),

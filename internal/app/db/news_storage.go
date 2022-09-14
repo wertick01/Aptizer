@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"aptizer.com/internal/app/models"
 	"github.com/doug-martin/goqu/v9"
@@ -138,11 +139,14 @@ func (news *NewsStorage) List() ([]*models.News, error) {
 	return listNews, nil
 }
 
-<<<<<<< HEAD:internal/app/db/news_storage.go
+// var CurrentTime = time.Now().Format("2006-01-02 15:04:05")
+
 func (news *NewsStorage) Create(headline *models.News) (*models.News, error) {
+	headline.Date = time.Now().Unix()
+
 	dialect := goqu.Dialect("mysql")
 
-	query, _, err := dialect.Insert(
+	insertquery, _, err := dialect.Insert(
 		"users",
 	).Prepared(
 		true,
@@ -153,43 +157,194 @@ func (news *NewsStorage) Create(headline *models.News) (*models.News, error) {
 			"headline_text": headline.Text,
 			"photo":         headline.Photo,
 			"author_id":     headline.Author,
-			"participants":  headline.Participants,
 		},
 	).ToSQL()
 	if err != nil {
 		return nil, err
 	}
-=======
-func checker(mass []int64, val int64) bool {
-	for _, i := range mass {
-		if i == val {
-			return true
+
+	if _, err := news.database.Exec(
+		insertquery,
+		headline.Date,
+		headline.Title,
+		headline.Text,
+		headline.Photo,
+		headline.Author,
+	); err != nil {
+		return nil, err
+	}
+	if err := news.database.QueryRow(
+		`SELECT LAST_INSERT_ID()`,
+	).Scan(
+		&headline.ID,
+	); err != nil {
+		return nil, err
+	}
+
+	headline, err = news.CreateParticipants(headline)
+	if err != nil {
+		return nil, err
+	}
+
+	headline, err = news.CreateTags(headline)
+	if err != nil {
+		return nil, err
+	}
+
+	return headline, nil
+}
+
+func (news *NewsStorage) Update(headline *models.News) (*models.News, error) {
+	headline.Updated_at = time.Now().Unix()
+
+	dialect := goqu.Dialect("mysql")
+
+	updatequery, _, err := dialect.Update(
+		"news",
+	).Set(
+		goqu.Record{
+			"title":         headline.Title,
+			"headline_text": headline.Text,
+			"photo":         headline.Photo,
+			"author_id":     headline.Author,
+			"updated_at":    headline.Updated_at,
+		},
+	).Prepared(
+		true,
+	).Where(
+		goqu.Ex{
+			"id": headline.ID,
+		},
+	).ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := news.database.Exec(
+		updatequery,
+		headline.Title,
+		headline.Text,
+		headline.Photo,
+		headline.Author,
+		headline.Updated_at,
+	); err != nil {
+		return nil, err
+	}
+
+	return headline, nil
+}
+
+func (news *NewsStorage) CreateParticipants(headline *models.News) (*models.News, error) {
+	dialect := goqu.Dialect("mysql")
+
+	insertbase := dialect.Insert(
+		"participants",
+	).Prepared(
+		true,
+	)
+
+	for _, participant := range headline.Participants {
+		query, _, err := insertbase.Rows(
+			goqu.Record{
+				"userid":      participant.UserID,
+				"headline_id": headline.ID,
+			},
+		).ToSQL()
+		if err != nil {
+			return nil, err
+		}
+
+		if _, err := news.database.Exec(
+			query,
+			participant.UserID,
+			headline.ID,
+		); err != nil {
+			return nil, err
 		}
 	}
-	return false
->>>>>>> 3e1fc7bc73966127223114869219a0b44788eb7d:internals/app/db/news_storage.go
+	return headline, nil
 }
 
-func Reverse(input []*models.Tag) []*models.Tag {
-	var output []*models.Tag
-	for i := len(input) - 1; i >= 0; i-- {
-		output = append(output, input[i])
+func (news *NewsStorage) CreateTags(headline *models.News) (*models.News, error) {
+	dialect := goqu.Dialect("mysql")
+
+	insertbase1 := dialect.Insert(
+		"tags",
+	).Prepared(
+		true,
+	)
+
+	insertbase2 := dialect.Insert(
+		"tags_news",
+	).Prepared(
+		true,
+	)
+
+	for _, tag := range headline.Tag {
+		insertquery1, _, err := insertbase1.Rows(
+			goqu.Record{
+				"tag": tag.Tag,
+			},
+		).ToSQL()
+		if err != nil {
+			return nil, err
+		}
+
+		if _, err := news.database.Exec(
+			insertquery1,
+			tag.Tag,
+		); err != nil {
+			return nil, err
+		}
+
+		if err := news.database.QueryRow(
+			`SELECT LAST_INSERT_ID()`,
+		).Scan(
+			&tag.TagID,
+		); err != nil {
+			return nil, err
+		}
+
+		insertquery2, _, err := insertbase2.Rows(
+			goqu.Record{
+				"headline_id": headline.ID,
+				"tag_id":      tag.TagID,
+			},
+		).ToSQL()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := news.database.Exec(
+			insertquery2,
+			headline.ID,
+			tag.TagID,
+		); err != nil {
+			return nil, err
+		}
 	}
-	return output
+	return headline, nil
 }
 
-func remove(slice []*models.News, s int) []*models.News {
-	return append(slice[:s], slice[s+1:]...)
-}
+func (news *NewsStorage) DeleteTags(tag *models.Tag) error {
+	dialect := goqu.Dialect("mysql")
 
-func tagRemove(slice []*models.Tag, s int64) []*models.Tag {
-	return append(slice[:s], slice[s+1:]...)
-}
+	deletequery, _, err := dialect.Delete(
+		"tags",
+	).Where(
+		goqu.Ex{
+			"tag_id": tag.TagID,
+		},
+	).ToSQL()
+	if err != nil {
+		return err
+	}
 
-func userRemove(slice []*models.User, s int64) []*models.User {
-	return append(slice[:s], slice[s+1:]...)
-}
+	if _, err := news.database.Exec(
+		deletequery,
+		tag.TagID,
+	); err != nil {
+		return err
+	}
 
-func sliceRemove(slice []int64, s int64) []int64 {
-	return append(slice[:s], slice[s+1:]...)
+	return nil
 }

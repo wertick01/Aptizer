@@ -1,16 +1,15 @@
 package models
 
-import "time"
-
 type News struct {
-	ID           int64     `json:"id"`
-	Text         string    `json:"text"`
-	Photo        string    `json:"photo"`
-	Title        string    `json:"title"`
-	Date         time.Time `json:"date"`
-	Author       *User     `json:"author"`
-	Participants []*User   `json:"participants"`
-	Tag          []*Tag    `json:"tag"`
+	ID           int64   `json:"id"`
+	Text         string  `json:"text"`
+	Photo        string  `json:"photo"`
+	Title        string  `json:"title"`
+	Date         int64   `json:"date"`
+	Author       *User   `json:"author"`
+	Participants []*User `json:"participants"`
+	Tag          []*Tag  `json:"tag"`
+	Updated_at   int64   `json:"updated_at"`
 }
 
 type Tag struct {
