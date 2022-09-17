@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"aptizer.com/internal/app/db"
+	"aptizer.com/internal/app/processors"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -14,15 +15,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newsStorage := db.NewNewsStorage(database)
-	usersStorage := db.NewUsersStorage(database)
-	store := db.New(
+	processor := processors.NewProcessor(
 		database,
-		newsStorage,
-		usersStorage,
+		db.NewNewsStorage(database),
+		db.NewUsersStorage(database),
 	)
-	news, err := store.NewsStorage.List()
-	fmt.Println(news)
+	users, err := processor.ListUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, i := range users {
+		fmt.Println(i)
+	}
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {

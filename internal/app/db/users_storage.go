@@ -222,7 +222,7 @@ func (m *UsersStorage) GetUsersList() ([]*models.User, error) {
 		"u.userdescription",
 		"u.userphoto",
 		"u.userrole",
-		"r.user_role",
+		"r.userrole",
 	).Where(
 		goqu.Ex{
 			"u.userid": goqu.Op{
@@ -432,7 +432,7 @@ func (m *UsersStorage) ChangeUser(old *models.User) (*models.User, error) {
 
 	dialect := goqu.Dialect("mysql")
 
-	updatequery, _, err := dialect.Update(
+	updatequery, args, err := dialect.Update(
 		"users",
 	).Set(
 		goqu.Record{
@@ -459,15 +459,7 @@ func (m *UsersStorage) ChangeUser(old *models.User) (*models.User, error) {
 
 	_, err = m.DB.Exec(
 		updatequery,
-		old.Name,
-		old.Surname,
-		old.Patrynomic,
-		old.Mail,
-		old.Phone,
-		old.Hash,
-		old.Description,
-		old.Photo,
-		old.Role.RoleID,
+		args...,
 	)
 	if err != nil {
 		return nil, err

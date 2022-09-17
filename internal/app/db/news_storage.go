@@ -146,7 +146,7 @@ func (news *NewsStorage) Create(headline *models.News) (*models.News, error) {
 
 	dialect := goqu.Dialect("mysql")
 
-	insertquery, _, err := dialect.Insert(
+	insertquery, args, err := dialect.Insert(
 		"users",
 	).Prepared(
 		true,
@@ -165,11 +165,7 @@ func (news *NewsStorage) Create(headline *models.News) (*models.News, error) {
 
 	if _, err := news.database.Exec(
 		insertquery,
-		headline.Date,
-		headline.Title,
-		headline.Text,
-		headline.Photo,
-		headline.Author,
+		args...,
 	); err != nil {
 		return nil, err
 	}
